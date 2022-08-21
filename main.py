@@ -27,7 +27,7 @@ import IPython.display as ipd
 from scipy import signal
 from scipy.io import wavfile
 import math
-
+import pyaudio as pa
 
 
 
@@ -35,21 +35,178 @@ pygame.mixer.init()
 
 window = Tk()
 window.title("MP3 PLAYER")
-window.geometry("800x800")
+window.geometry("1550x810")
 
+
+
+def audio_processing():
+    # AUDIO PROCESSING
+    #global s_rate
+    #file1 = wave.open(output_file)
+    global output_file
+    global mono
+    file1 = wave.open(output_file)
+    print(type(file1))
+
+    s_rate = file1.getframerate()
+    print(s_rate)
+    no_of_channels = file1.getnchannels()
+    print(no_of_channels)
+
+    no_of_frames = file1.getnframes()
+    print(no_of_frames)
+
+    data1 = file1.readframes(-1)
+    # print(len(data1))
+    # print(type(data1))
+
+    w_data = np.frombuffer(data1, np.int16)
+    # print(w_data)
+    # print(type(w_data))
+    # print(len(w_data))
+    # print(w_data)
+
+    mono = []
+    print("BEFORE PLAYING SIZE OF MONO")
+    print(len(mono))
+    if(len(mono)):
+        mono.clear()
+
+    m1 = 0
+    while m1 <= len(w_data) - 1:
+        mono.append(w_data[m1])
+        m1 = m1 + 2
+    print("AFTER PLAYING MONO SIZE")
+    print(len(mono))
+    w_data.shape = -1, 2
+
+    global songdur1
+
+
+    s_rate = file1.getframerate()
+    CHUNK = 1024 * 2
+    CHANNELS = 1
+    FORMAT = pa.paInt16
+
+    RATE = s_rate
+
+    frame = []
+    fr = 0
+
+
+    print("FRAMES")
+    print(int(RATE / CHUNK * songdur1))
+    #print(type(data1))
+    #print(len(data1))
+    # print(data1)
+
+    for fr in range(fr, int(RATE / CHUNK)):
+        pass
+
+    # for fr in range(fr,)
+    play = pa.PyAudio()
+    stream_play = play.open(format=FORMAT,
+                            channels=CHANNELS,
+                            rate=RATE,
+                            output=True)
+
+    fig, ax = plt.subplots()
+    x = np.arange(0, CHUNK, 1)
+    line, = ax.plot(x, np.random.rand(CHUNK), 'r')
+    ax.set_ylim(-32770, 32770)
+    ax.ser_xlim = (0, CHUNK)
+
+    fig.show()
+
+    print("playing")
+
+    isa = 0
+    jsa = 0
+    ksa = 0
+    data_sa = []
+    no_of_frames = file1.getnframes()
+    print(no_of_frames)
+    print(s_rate)
+    #mono = []
+    print(len(mono))
+    print(CHUNK)
+    print(int(len(mono) / CHUNK))
+
+    for isa in range(isa, int(len(mono) / CHUNK)):
+        ksa = 0
+        for ksa in range(ksa, CHUNK):
+            data_sa.append(mono[jsa])
+            jsa = jsa + 1
+
+        # stream_play.write(data_sa)
+        # wav_data = np.frombuffer(data_sa, 'int16')
+        # print(wav_data)
+
+        # print(struct.calcsize(str(CHUNK))+'h');
+
+        # dataInt = struct.unpack(str(CHUNK) + 'h',wav_data)
+        # print(len(dataInt))
+        # print(data_sa)
+        # print(len(data_sa))
+        line.set_ydata(data_sa)
+        fig.canvas.draw()
+        fig.canvas.flush_events()
+
+        # print(data_sa)
+        data_sa.clear()
+
+    stream_play.stop_stream()
+    stream_play.close()
+    play.terminate()
+
+def cover_pic():
+    pass
+    """
+    global song
+    metadata = audio_metadata.load(song)
+    # print(metadata)
+
+    # get the picture data for the first picture in metadata pictures
+    pic = metadata.pictures[0].data
+
+    # open stream (similar to file) in binary mode
+    stream = BytesIO(pic)
+
+    # display artwork on tkinter
+    canvas = Canvas(f2, width=230, height=230)
+    canvas.pack(pady=30, side=BOTTOM)
+    img1 = ImageTk.PhotoImage(Image.open(stream))
+
+    canvas.create_image(0, 0, image=img1)
+
+    """
 
 # LEFT FRAME ; PLAYLISTS,ARTISTS,ALBUMS
 def playlistfun():
     global plist_arti_alb_box
     if plist_arti_alb_box.size() >= 0:
         plist_arti_alb_box.delete(0, END)
+    """
+    global songbox
+    global size_songbox
+    n0 = size_songbox
+    global l_playlist
+
+    if songbox.size() >= 0:
+        songbox.delete(0, END)
+    ipl=0
+    for song_pl in l_playlist:
+        songbox.insert(END, song_pl)
 
     """
-    #ACTIVATING ARTIST BUTTON
-    global b2f1
-    if artist_button == False:
-        b2f1.config(state="active")
-    """
+
+
+
+
+
+
+
+
 
 
 # FOR ARTIST
@@ -68,10 +225,12 @@ def artistfun():
         s = f'C:/Users/shash/PycharmProjects/MP3/audio/{s}.mp3'
         l.append(s)
     # print(len(l))
+
     i = 0
     for i in range(i, len(l)):
         audio = TinyTag.get(l[i])
         # print(type(audio))
+
         a = audio.artist
         l1.append(a)
     # print(l1)
@@ -87,16 +246,7 @@ def artistfun():
     artists = (sorted(artists))
     # print(artists)
 
-    """
-    #FOR DISABLING ARTIST BUTTON
-    #global b2f1
-    global artist_button
-    artist_button=TRUE
 
-    if artist_button==TRUE:
-        b2f1.config(state="disabled")
-        artist_button=False
-    """
     for i in artists:
         # print(i)
         i1 = 1
@@ -126,15 +276,7 @@ def albumfun():
         l.append(album1)
     # print(album1)
 
-    """
-    #ACTIVATING ARTIST BUTTON
-    global b2f1
-    if artist_button == False:
-        b2f1.config(state="active")
 
-    album_box = Listbox(f1, bg="blue", width=34, height=30)
-    album_box.pack()
-    """
 
 
 # PLAY FUCTION
@@ -151,6 +293,7 @@ def play():
 
     loop = AudioSegment.from_mp3(song)
 
+    global output_file
     output_file = "result.wav"
     loop.export(output_file, format="wav")
 
@@ -159,7 +302,7 @@ def play():
     pygame.mixer.music.play(loops=0)
     songstatus()
 
-    # META_DATA FOR COVER IMAGE
+
 
     metadata = audio_metadata.load(song)
     # print(metadata)
@@ -171,132 +314,14 @@ def play():
     stream = BytesIO(pic)
 
     # display artwork on tkinter
-    canvas = Canvas(f2, width=512, height=512)
-    canvas.pack()
+    canvas = Canvas(f2, width=230, height=230)
+    canvas.pack(pady=30, side=BOTTOM)
     img1 = ImageTk.PhotoImage(Image.open(stream))
 
     canvas.create_image(0, 0, image=img1)
 
-    file = wave.open('result.wav')
-    print(type(file))
-    print(file)
-    number_of_channels = file.getnchannels()
-    print(number_of_channels)
-    number_of_frames = file.getnframes()
-    print(number_of_frames)
-    data = file.readframes(-1)
-    print(type(data))
-    print(len(data))
-    print(data[1])
-    # print(data)
-    frame_rate = file.getframerate()
-    print(frame_rate)
-    wav_data = np.frombuffer(data, 'int16')
-    print(type(wav_data))
-    print(len(wav_data))
-    print(wav_data)
-    wav_data.shape = -1, 2
-    print(type(wav_data))
-    print(wav_data[0])
-    wav_data = wav_data.T
-    print(type(wav_data))
-    print(wav_data[0])
-
-
-    duration = 1/float(file.getframerate())
-    print(type(duration))
-    print(duration)
-    t_seq = np.arange(0, file.getnframes() / float(frame_rate), duration)
-    print(type(t_seq))
-    print(t_seq)
-    print(len(t_seq))
-    print(file.getnframes() / float(frame_rate))
-
-
-    #plt.plot(t_seq, wav_data[0])
-    plt.plot(t_seq,wav_data[0])
-    plt.show()
-
-    """
-    y, sr = librosa.load(output_file,mono=False)
-    print(type(y))
-    print(y)
-    print(len(y))
-    print(y[0])
-
-    print(len(y[0]))
-    print(y[0][0])
-    #print(math.floor(y[0][0]))
-    #print(math.ceil(y[0][1]))
-
-    print(type(y[0][0]))
-
-    print(type(sr))
-    print(sr)
-
-    plt.figure()
-    plt.plot(y)
-    plt.show()
-    #plt.subplot(3, 1, 2)
-    """
-    """
-    plt.figure(figsize=(12,4))
-    librosa.display.waveshow(y, sr=sr)
-    plt.title('Stereo')
-    """
-    # ipd.Audio(output_file)
-
-
-    """
-    file1=wave.open(output_file)
-    print(type(file1))
-
-
-    s_rate=file1.getframerate()
-    print(s_rate)
-    no_of_channels=file1.getnchannels()
-    print(no_of_channels)
-
-    no_of_frames=file1.getnframes()
-    print(no_of_frames)
-
-    data1=file1.readframes(-1)
-    print(len(data1))
-    print(type(data1))
-
-
-    w_data=np.frombuffer(data1,np.int16)
-    print(type(w_data))
-    print(len(w_data))
-    print(w_data)
-    w_data.shape=-1,2
-    print(w_data)
-    """
-
-
-    # check1()
-
-    # pygame.mixer.music.load(song)
-    #pygame.mixer.music.load(song)
-    #pygame.mixer.music.play(loops=0)
-    """
-    #METADATA
-    audio = TinyTag.get(song)
-    print(audio)
-    #print(type(audio))
-    #print(audio.artist)
-    #print(audio)
-    l1=[]
-    l1.append(audio.artist)
-    #print(l1)
-
-
-
-
-    """
-    """
     # META_DATA FOR COVER IMAGE
-
+    """
     metadata = audio_metadata.load(song)
     # print(metadata)
 
@@ -307,13 +332,14 @@ def play():
     stream = BytesIO(pic)
 
     # display artwork on tkinter
-    canvas = Canvas(f2, width=512, height=512)
-    canvas.pack()
+    canvas = Canvas(f2, width=230, height=230)
+    canvas.pack(pady=30,side=BOTTOM)
     img1 = ImageTk.PhotoImage(Image.open(stream))
 
     canvas.create_image(0, 0, image=img1)
-
     """
+    audio_processing()
+
 
     #songstatus()
 
@@ -362,7 +388,7 @@ def songstatus():
 
     # CHECK
     # SHOW SLIDER TIME TEMPORARY
-    temp_slider.config(text=f'Slider:{int(slider.get())} ,Current_time: {int(current_time)}')
+    #temp_slider.config(text=f'Slider:{int(slider.get())} ,Current_time: {int(current_time)}')
 
     current_time = slider.get()
     slider.config(value=int(current_time))
@@ -370,102 +396,6 @@ def songstatus():
     # UPADTE TIME
     song_status.after(1000, songstatus)
 
-
-"""
-#SONG STATUS
-def songstatus():
-
-    #SONG CURRENT TIME
-    current_time=pygame.mixer.music.get_pos()/1000
-
-    #SHOW SLIDER TIME TEMPORARY
-    temp_slider.config(text=f'Slider:{int(slider.get())} ,Current_time: {int(current_time)}')
-
-
-    new_currrent_time=time.strftime('%M:%S',time.gmtime(current_time))
-    song_status.config(text=new_currrent_time)
-
-    #SONG TOTAL LENGTH
-    #current_song=songbox.curselection()
-    song=songbox.get(ACTIVE)
-    song=f'C:/Users/shash/PycharmProjects/MP3/audio/{song}.mp3'
-    song1=MP3(song)
-    global songdur1
-    songdur1=song1.info.length
-    song_duration=time.strftime('%M:%S',time.gmtime(songdur1))
-
-    song_status.config(text=f'{new_currrent_time}of{song_duration}')
-
-    #UPDATE SLIDER TO GET CURRENT TIME
-    slider.config(value=int(current_time))
-
-    # UPDATE SLIDER LENGTH
-    slider_lenght = int(songdur1)
-    #current_time +=1
-    slider.config(to=slider_lenght, value=int(current_time))
-
-    #UPADTE TIME
-    song_status.after(1000,songstatus)
-
-"""
-"""
-#AUDIO PROCESSING
-def audio_modulation():
-
-    global song
-    print(song)
-
-    print(loop)
-    print(f"SIZE OF AUDIOSEGMENT:{len(loop)}")
-    print(type(loop))
-    print(f"Channels: {loop.channels}")
-    print(f"Sample width: {loop.sample_width}")
-    print(f"Frame rate (sample rate): {loop.frame_rate}")
-    print(f"Frame width: {loop.frame_width}")
-    print(f"Length (ms): {len(loop)}")
-    print(f"Frame count: {loop.frame_count()}")
-    print(f"Intensity: {loop.dBFS}")
-    # Play the result
-    #play(loop)
-
-    output_file = "result.wav"
-    print(output_file)
-    print(type(output_file))
-    print(len(output_file))
-    for s in output_file:
-        print(s)
-
-    # convert mp3 file to wav file
-    loop.export(output_file, format="wav")
-    print(output_file)
-    print(type(output_file))
-    print(len(output_file))
-    for s in output_file:
-        print(s)
-
-    #y1,sr1=librosa.read(output_file)
-
-
-
-    #USING NUMPY
-    y = loop.get_array_of_samples()
-    sr = loop.frame_rate
-    # Returns array.array with interlaced left-right channels
-    # Convert to numpy and extract one channel
-    y = np.array(y)[::2]
-    print(type(y), y.shape, y.dtype, sr)
-    # Convert int16 to float32 and normalize
-    y = y.astype('float32') / 10000
-    y -= y.mean()
-    print(len(y))
-
-
-
-    # Play with SoundDevice
-    #sd.play(y, sr)
-    #sd.wait()
-
-"""
 
 
 # SLIDER
@@ -491,11 +421,14 @@ def pause():
 
     if var1 == False:
         pygame.mixer.music.pause()
-        b6l1.config(text="RESUME")
+        global resume_img
+        b6l1.config(image=resume_img)
         var1 = TRUE
     else:
+
         pygame.mixer.music.unpause()
-        b6l1.config(text="PAUSE")
+        global pause_img
+        b6l1.config(image=pause_img)
         var1 = False
 
 
@@ -561,18 +494,24 @@ def onesong():
     song = filedialog.askopenfilename(initialdir='audio/', title="chhose a song", filetypes=(("mp3 Files", "*.mp3"),))
     song = song.replace("C:/Users/shash/PycharmProjects/MP3/audio/", "")
     song = song.replace(".mp3", "")
+    global l_playlist
+    l_playlist=[]
+    l_playlist.append(song)
 
     songbox.insert(END, song)
     global size_songbox
     size_songbox = songbox.size()
-    # print(size_songbox)
-
-
+    print(size_songbox)
 def manysong():
+
     songs = filedialog.askopenfilenames(initialdir='audio/', title="chhose a song", filetypes=(("mp3 Files", "*.mp3"),))
     for song in songs:
         song = song.replace("C:/Users/shash/PycharmProjects/MP3/audio/", "")
         song = song.replace(".mp3", "")
+        global l_playlist
+
+        l_playlist.append(song)
+
         songbox.insert(END, song)
         global size_songbox
         size_songbox = songbox.size()
@@ -637,27 +576,50 @@ f2 = Frame(window, bg="black", width=100, height=100)
 f2.pack(side=LEFT, fill=Y, pady=128, expand=YES)
 # l3f2=Label(f2,width=900,height=465)
 # l3f2.pack()
+global l1f2
 l1f2 = Label(f2, bg="blue", width=120, height=2)
 l1f2.pack(side=BOTTOM)
-b1l1 = Button(l1f2, text="PREVIOUS", width=15, command=previousong)
-b1l1.pack(side=LEFT, padx=20)
-b4l1 = Button(l1f2, text="NEXT", width=15, command=nextsong)
-b4l1.pack(padx=10, side=LEFT)
-b2l1 = Button(l1f2, text="PLAY", width=15, fg="green", command=play)
-b2l1.pack(padx=10, side=LEFT)
-b6l1 = Button(l1f2, text="PAUSE", width=15, command=pause)
-b6l1.pack(padx=10, side=LEFT)
-b5l1 = Button(l1f2, text="STOP", width=15, command=stop)
-b5l1.pack(padx=10, side=LEFT)
-# VOLUME SLIDER
 
-l2f2 = Label(l1f2, width=10, text="VOLUME", height=2)
-l2f2.pack(side=LEFT)
+specto_img=ImageTk.PhotoImage(Image.open("specto_img.png"))
+spect_button=Button(l1f2,width=50,image=specto_img)
+spect_button.pack(side=LEFT,padx=20)
+
+previous_img = ImageTk.PhotoImage(Image.open("previous.png"))
+
+
+# Create a Label Widget to display the text or Image
+
+b1l1 = Button(l1f2, width=80, command=previousong,image=previous_img,height=25)
+#b1l1 = Button(l1f2, text="PREVIOUS", width=15, command=previousong)
+b1l1.pack(side=LEFT, padx=20)
+
+next_img = ImageTk.PhotoImage(Image.open("next.png"))
+b4l1 = Button(l1f2, width=80, height=25,command=nextsong,image=next_img)
+b4l1.pack(padx=10, side=LEFT)
+play_img = ImageTk.PhotoImage(Image.open("play.ico"))
+b2l1 = Button(l1f2, width=80,height=25, fg="green", command=play,image=play_img)
+b2l1.pack(padx=10, side=LEFT)
+global pause_img
+pause_img = ImageTk.PhotoImage(Image.open("pause.png"))
+global resume_img
+resume_img=ImageTk.PhotoImage(Image.open("resume.png"))
+
+global b6l1
+b6l1 = Button(l1f2, width=80,height=25, command=pause,image=pause_img)
+b6l1.pack(padx=10, side=LEFT)
+
+stop_img = ImageTk.PhotoImage(Image.open("stop.png"))
+b5l1 = Button(l1f2, width=80,height=25, command=stop,image=stop_img)
+b5l1.pack(side=LEFT,padx=10)
+# VOLUME SLIDER
+volume_img = ImageTk.PhotoImage(Image.open("volume.png"))
+l2f2 = Label(l1f2, width=70,height=25,image=volume_img)
+l2f2.pack(side=LEFT,padx=5)
 l3f2 = Label(l1f2, height=2)
 l3f2.pack()
 
 volume_slider = ttk.Scale(l3f2, from_=0, to=1, orient=HORIZONTAL, value=0, command=volume, length=100)
-volume_slider.pack()
+volume_slider.pack(padx=10)
 
 # SONG DURATION
 song_status = Label(f2, anchor=E)
@@ -667,8 +629,8 @@ slider = ttk.Scale(song_status, from_=0, to=100, value=0, command=song_slider, l
 slider.pack()
 
 # TEMPORARY SLIDER HELP
-temp_slider = Label(song_status)
-temp_slider.pack()
+#temp_slider = Label(song_status)
+#temp_slider.pack()
 
 # SONGS LIST
 f3 = Frame(window, bg="grey")
@@ -682,29 +644,6 @@ songbox.pack()
 # fl2.pack()
 
 
-"""
-#get all metadata of song.mp3
-metadata=audio_metadata.load(song)
 
-# get the picture data for the first picture in metadata pictures
-artwork = metadata.pictures[0].data
-
-# open stream (similar to file) in binary mode
-stream = BytesIO(artwork)
-
-root = Tk()
-# display artwork on tkinter
-canvas = Canvas(root, width = 512, height = 512)
-canvas.pack()
-img = ImageTk.PhotoImage(Image.open(stream))
-canvas.create_image(0, 0, anchor=NW, image=img)
-
-
-
-
-
-
-
-"""
 window.mainloop()
 
